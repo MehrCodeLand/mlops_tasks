@@ -1,31 +1,53 @@
-name: Test with Multiple Python Versions
+# .github/workflows/test-ex2.yml
+# Workflow to test ex_2 folder with pytest and multiple Python versions
 
+name: Test Exercise 2
+
+# Trigger: Run when changes are made to ex_2 folder
 on:
   push:
-    branches: [main]
+    branches: [ main, develop ]
+    paths:
+      - 'ex_2/**'  # Only run when ex_2 files change
   pull_request:
-    branches: [main]
+    branches: [ main ]
+    paths:
+      - 'ex_2/**'
 
 jobs:
-  test:
+  test-ex2:
     runs-on: ubuntu-latest
+    
+    # Test with multiple Python versions
     strategy:
       matrix:
-        python-version: [3.8, 3.9, 3.10]
-
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    
     steps:
-    - uses: actions/checkout@v3
-
+    # Step 1: Get the code
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Step 2: Setup Python
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-
+    
+    # Step 3: Install pytest and dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Run tests
+        pip install pytest
+        # If you have requirements.txt in ex_2 folder:
+        if [ -f ex_2/requirements.txt ]; then pip install -r ex_2/requirements.txt; fi
+    
+    # Step 4: Run pytest in ex_2 folder
+    - name: Run tests with pytest
       run: |
-        pytest
+        cd ex_2
+        pytest -v
+    
+    # Step 5: Show Python version (for debugging)
+    - name: Display Python version
+      run: python --version
